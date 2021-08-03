@@ -2,9 +2,9 @@ import * as actionTypes from "../types";
 import axios from "axios";
 import queryString from "query-string";
 
-export const baseURL = "hr.ekrut.co";
+export const baseURL = "http://hr.ekrut.co";
 
-export const httpR = (params, setProgress) => async (dispatch, state) => {
+export const http = (params, setProgress) => async (dispatch, state) => {
   try {
     let auth = JSON.parse(localStorage.getItem("Ekrut-regis"));
     let query = params.query
@@ -30,6 +30,8 @@ export const httpR = (params, setProgress) => async (dispatch, state) => {
         }
       },
     };
+
+    console.log("[config]", config);
     let { data } = await axios(config);
     return { success: true, response: data };
   } catch (err) {
@@ -43,4 +45,61 @@ export const changeStateLoading = state => {
     type: actionTypes.SET_LOADING,
     state,
   };
+};
+
+export const changeStateUserId = state => {
+  return {
+    type: actionTypes.SET_USERID,
+    state,
+  };
+};
+
+export const onSubmitBasicForm = data => async dispatch => {
+  let params = {
+    method: "POST",
+    path: "/items/users",
+    data,
+  };
+
+  console.log("[params]", params);
+
+  const res = await dispatch(http(params));
+  if (res.success) {
+    console.log("[sukses create User]", res);
+  } else {
+    console.log("error create user");
+  }
+  return res;
+};
+
+export const onSubmitEduForm = data => async dispatch => {
+  let params = {
+    method: "POST",
+    path: "/items/education",
+    data,
+  };
+
+  const res = await dispatch(http(params));
+  if (res.success) {
+    console.log("[sukses create edu]", res);
+  } else {
+    console.log("error create edu");
+  }
+  return res;
+};
+
+export const onSubmitExperienceForm = data => async dispatch => {
+  let params = {
+    method: "POST",
+    path: "/items/experience",
+    data,
+  };
+
+  const res = await dispatch(http(params));
+  if (res.success) {
+    console.log("[sukses create xperience]", res);
+  } else {
+    console.log("error create xperience");
+  }
+  return res;
 };

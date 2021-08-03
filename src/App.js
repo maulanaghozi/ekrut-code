@@ -1,6 +1,14 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import classes from "./App.module.scss";
 import { InputWithLabel } from "components/forms";
+import { SET_EMAIL, SET_FULLNAME, SET_PHONE } from "store/types";
+import {
+  onSubmitBasicForm,
+  changeStateUserId,
+  onSubmitEduForm,
+  onSubmitExperienceForm,
+} from "store/actions/main";
 
 function App() {
   const [educations, setEducations] = useState([
@@ -18,6 +26,23 @@ function App() {
     },
   ]);
 
+  const dispatch = useDispatch();
+  const basicInfo = useSelector(state => state.basicInformationReducer);
+  const mainState = useSelector(state => state.mainReducer);
+  const { fullname, phone, email } = basicInfo;
+
+  const onHandleEditEdu = (newValue, id) => {
+    const newEdu = educations.map(item => {
+      if (item.id === id) {
+        return { ...item, ...newValue };
+      } else {
+        return item;
+      }
+    });
+
+    setEducations(newEdu);
+  };
+
   const onHandleAddEducation = () => {
     const length = educations.length;
     setEducations([
@@ -26,6 +51,7 @@ function App() {
         id: length + 1,
         school: "",
         major: "",
+        user_id: mainState.userId,
       },
     ]);
   };
@@ -33,6 +59,18 @@ function App() {
   const onDeleteEducation = id => {
     const rows = educations.filter(item => item.id !== id);
     setEducations(rows);
+  };
+
+  const onHandleEditExperience = (newValue, id) => {
+    const newExperience = experiences.map(item => {
+      if (item.id === id) {
+        return { ...item, ...newValue };
+      } else {
+        return item;
+      }
+    });
+
+    setEducations(newExperience);
   };
 
   const onHandleAddExperience = () => {
@@ -43,6 +81,7 @@ function App() {
         id: length,
         company: "",
         title: "",
+        user_id: mainState.userId,
       },
     ]);
   };
@@ -50,6 +89,34 @@ function App() {
   const onDeleteExperience = id => {
     const rows = experiences.filter(item => item.id !== id);
     setExperiences(rows);
+  };
+
+  const onSubmit = async () => {
+    const res = await dispatch(onSubmitBasicForm({ fullname, phone, email }));
+
+    if (res.success) {
+      dispatch(changeStateUserId(res.response.data.id));
+
+      const dataEdu = educations.map(item => {
+        delete item.id;
+        item.user_id = res.response.data.id;
+
+        return item;
+      });
+
+      const dataExp = experiences.map(item => {
+        delete item.id;
+        item.user_id = res.response.data.id;
+
+        return item;
+      });
+
+      await dispatch(onSubmitEduForm(dataEdu));
+      await dispatch(onSubmitExperienceForm(dataExp));
+      alert("Submit berhasil!");
+    } else {
+      alert("Submit gagal!");
+    }
   };
 
   return (
@@ -61,22 +128,37 @@ function App() {
         <div className={classes.formBasic}>
           <InputWithLabel
             label={"Full Name"}
-            value={""}
-            setValue={() => {}}
+            value={fullname}
+            setValue={value =>
+              dispatch({
+                type: SET_FULLNAME,
+                state: value,
+              })
+            }
             name={"fullname"}
             placeholder={"Enter your name"}
           />
           <InputWithLabel
             label={"Phone Number"}
-            value={""}
-            setValue={() => {}}
+            value={phone}
+            setValue={value =>
+              dispatch({
+                type: SET_PHONE,
+                state: value,
+              })
+            }
             name={"phone"}
             placeholder={"Enter your phone number"}
           />
           <InputWithLabel
             label={"Email"}
-            value={""}
-            setValue={() => {}}
+            value={email}
+            setValue={value =>
+              dispatch({
+                type: SET_EMAIL,
+                state: value,
+              })
+            }
             name={"email"}
             placeholder={"Enter your email"}
           />
@@ -93,7 +175,7 @@ function App() {
                 styleContainer={classes.form}
                 label={"School"}
                 value={item.school}
-                setValue={() => {}}
+                setValue={val => onHandleEditEdu({ school: val }, item.id)}
                 name={"school"}
                 placeholder={""}
               />
@@ -101,7 +183,7 @@ function App() {
                 styleContainer={classes.form}
                 label={"Major"}
                 value={item.major}
-                setValue={() => {}}
+                setValue={val => onHandleEditEdu({ major: val }, item.id)}
                 name={"major"}
                 placeholder={""}
               />
@@ -128,7 +210,9 @@ function App() {
                 styleContainer={classes.form}
                 label={"Company"}
                 value={item.company}
-                setValue={() => {}}
+                setValue={val =>
+                  onHandleEditExperience({ company: val }, item.id)
+                }
                 name={"school"}
                 placeholder={""}
               />
@@ -136,8 +220,10 @@ function App() {
                 styleContainer={classes.form}
                 label={"Title"}
                 value={item.title}
-                setValue={() => {}}
-                name={"major"}
+                setValue={val =>
+                  onHandleEditExperience({ title: val }, item.id)
+                }
+                name={"title"}
                 placeholder={""}
               />
               {idx !== 0 && idx === experiences.length - 1 && (
@@ -152,7 +238,7 @@ function App() {
           Add New
         </button>
       </section>
-      <button>Submit</button>
+      <button onClick={onSubmit}>Submit</button>
     </div>
   );
 }
