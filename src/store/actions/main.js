@@ -31,7 +31,6 @@ export const http = (params, setProgress) => async (dispatch, state) => {
       },
     };
 
-    console.log("[config]", config);
     let { data } = await axios(config);
     return { success: true, response: data };
   } catch (err) {
@@ -61,13 +60,11 @@ export const onSubmitBasicForm = data => async dispatch => {
     data,
   };
 
-  console.log("[params]", params);
-
   const res = await dispatch(http(params));
   if (res.success) {
-    console.log("[sukses create User]", res);
+    //console.log("[sukses create User]", res);
   } else {
-    console.log("error create user");
+    //console.log("error create user");
   }
   return res;
 };
@@ -81,9 +78,9 @@ export const onSubmitEduForm = data => async dispatch => {
 
   const res = await dispatch(http(params));
   if (res.success) {
-    console.log("[sukses create edu]", res);
+    // console.log("[sukses create edu]", res);
   } else {
-    console.log("error create edu");
+    //console.log("error create edu");
   }
   return res;
 };
@@ -97,9 +94,9 @@ export const onSubmitExperienceForm = data => async dispatch => {
 
   const res = await dispatch(http(params));
   if (res.success) {
-    console.log("[sukses create xperience]", res);
+    //console.log("[sukses create xperience]", res);
   } else {
-    console.log("error create xperience");
+    //console.log("error create xperience");
   }
   return res;
 };
